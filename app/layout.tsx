@@ -25,11 +25,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+      ></meta>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased pt-14 px-12`}
       >
         {children}
-        <div className="w-fit h-fit mx-auto fixed bottom-20 left-1/6 shadow z-10">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto shadow z-10">
           <NavBar />
         </div>
       </body>
