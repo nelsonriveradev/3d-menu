@@ -30,10 +30,10 @@ export default function RootLayout({
         content="width=device-width, initial-scale=1.0"
       ></meta>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased pt-14 px-12`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
       >
         {children}
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto shadow z-10">
+        <div className=" bg-transparent fixed bottom-5 left-1/2 -translate-x-1/2 mx-auto  z-10">
           <NavBar />
         </div>
       </body>

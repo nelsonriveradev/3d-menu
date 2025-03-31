@@ -1,4 +1,5 @@
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import Image from "next/image";
 import ItemCard from "./components/ItemCard";
 export default function Home() {
@@ -25,10 +26,16 @@ export default function Home() {
 
       <div className="mt-7">
         <h1 className="text-xl">Te recomendamos</h1>
-        <div className="">
-          <ItemCard />
+        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+          <ItemCard name="Pizza" />
+          <ItemCard name="Pizza" />
+          <ItemCard name="Pizza" />
+          <ItemCard name="Pizza" />
         </div>
       </div>
+      <footer className="mt-10">
+        <Footer />
+      </footer>
     </div>
   );
 }
