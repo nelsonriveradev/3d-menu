@@ -1,9 +1,33 @@
+"use client";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import CategoryList from "./components/CategoryList";
 import Image from "next/image";
 import ItemCard from "./components/ItemCard";
+import { createClient } from "@/utils/supabase/client";
+import { useState, useEffect } from "react";
 export default function Home() {
+  const supabase = createClient();
+  const [data, setData] = useState<any[]>([]);
+
+  console.log("Data:", data);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: menuItems, error } = await supabase
+        .from("menu_items")
+        .select("*")
+        .range(0, 9);
+
+      if (error) {
+        console.error("Error fetching data:", error);
+      } else {
+        setData(menuItems);
+      }
+    };
+
+    fetchData();
+  }, [supabase]);
   return (
     <div>
       <header>
@@ -30,11 +54,17 @@ export default function Home() {
 
       <div className="mt-7">
         <h1 className="text-xl">Te recomendamos</h1>
+
         <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-          <ItemCard name="Pizza" />
-          <ItemCard name="Pizza" />
-          <ItemCard name="Pizza" />
-          <ItemCard name="Pizza" />
+          {data.map((item) => (
+            <ItemCard
+              key={item.name}
+              name={item.name}
+              description={item.description}
+              price={item.price}
+              image_plate={item.image_plate}
+            />
+          ))}
         </div>
       </div>
       <footer className="mt-10">
