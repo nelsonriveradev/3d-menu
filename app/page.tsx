@@ -1,5 +1,6 @@
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import CategoryList from "./components/CategoryList";
 import Image from "next/image";
 import ItemCard from "./components/ItemCard";
 export default function Home() {
@@ -23,6 +24,9 @@ export default function Home() {
           placeholder="¿Que te antojas?"
         />
       </form>
+      <div className="mt-5">
+        <CategoryList />
+      </div>
 
       <div className="mt-7">
         <h1 className="text-xl">Te recomendamos</h1>

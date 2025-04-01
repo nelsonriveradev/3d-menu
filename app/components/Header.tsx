@@ -12,7 +12,7 @@ export default function Header({
         <h1 className="font-bold text-lg">{restaurantName}</h1>
       </div>
       <div className="w-fit">
-        <button className="p-2 bg-zinc-300 rounded-lg text-zinc-900 shadow-2xl text-sm font-medium">
+        <button className="p-2 bg-zinc-300 rounded-lg text-zinc-900 shadow-2xl text-xs font-medium">
           Dejanos tu review
         </button>
       </div>
