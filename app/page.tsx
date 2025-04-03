@@ -68,7 +68,11 @@ export default function Home() {
         </div>
       </div>
       <footer className="mt-10">
-        <Footer />
+        <Footer
+          restaurantName="Restaurante Prueba"
+          phoneNumber="787-123-4567"
+          email="restaurante.prueba@email.com"
+        />
       </footer>
     </div>
   );

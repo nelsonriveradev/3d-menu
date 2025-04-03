@@ -4,7 +4,7 @@ Link;
 
 export default function NavBar() {
   return (
-    <div className=" py-2 px-4 rounded-lg flex justify-center items-center gap-x-10 w-72 bg-zinc-800/40 backdrop-blur-sm ">
+    <div className=" py-2 px-4 rounded-lg flex justify-center items-center gap-x-10 w-56 bg-zinc-800/40 backdrop-blur-sm ">
       <Link href="#" prefetch={true} className="cursor-pointer">
         <Image
           src="/Icons/icons8-back-100.png"
