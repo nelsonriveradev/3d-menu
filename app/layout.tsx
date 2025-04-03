@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import NavBar from "./components/NavBar";
 
@@ -29,6 +30,13 @@ export default function RootLayout({
         name="viewport"
         content="width=device-width, initial-scale=1.0"
       ></meta>
+      <head>
+        <Script
+          type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
       >
