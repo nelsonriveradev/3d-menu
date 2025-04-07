@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import AddMenuItem from "./action";
+import { toast } from "sonner";
 
 export interface ItemInfo {
   name: string;
@@ -23,8 +24,19 @@ export default function Admin() {
     const inputOption = event.currentTarget
       .previousElementSibling as HTMLInputElement;
     const option = inputOption.value.trim();
-    setOptions((prevOptions) => [...prevOptions, option]);
+
+    setOptions((prevOptions) => {
+      const alreadyOption = prevOptions.includes(option);
+      if (!alreadyOption) {
+        return [...prevOptions, option];
+      } else {
+        toast(`Opcion ya está en lista: ${option}`);
+        return prevOptions;
+      }
+    });
+
     console.log("Options:", options);
+    inputOption.value = "";
   }
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -39,7 +51,9 @@ export default function Admin() {
       image_plate: formData.get("image_plate") as string, // Placeholder for file handling
       object: [], // Placeholder for 3D objects file handling
     };
-    setNewMenuItem(newItem);
+    try {
+      setNewMenuItem(newItem);
+    } catch (error) {}
     console.log("Submitted from Client", newItem);
     return AddMenuItem(newItem);
   }
@@ -83,6 +97,12 @@ export default function Admin() {
               >
                 Añadir option
               </button>
+            </div>
+            {/* Option Array */}
+            <div className="flex gap-x-2 flex-wrap">
+              {options.map((optionItem) => (
+                <p key={optionItem}>{optionItem}</p>
+              ))}
             </div>
           </div>
 
