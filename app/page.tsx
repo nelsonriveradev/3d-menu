@@ -6,9 +6,10 @@ import Image from "next/image";
 import ItemCard from "./components/ItemCard";
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
+import { ItemInfo } from "./admin/ingresar-plato/page";
 export default function Home() {
   const supabase = createClient();
-  const [data, setData] = useState<any[]>([]);
+  const [data, setData] = useState<ItemInfo[]>([]);
 
   console.log("Data:", data);
 
@@ -31,7 +32,7 @@ export default function Home() {
   return (
     <div>
       <header>
-        <Header restaurantName="Restaurante Prueba" />
+        <Header restaurantName="Restaurante Prueba" reviewLink="#" />
       </header>
 
       <form className=" mt-5 py-2 px-4 bg-zinc-300 rounded-lg flex justify-start items-center gap-x-5">
@@ -62,7 +63,7 @@ export default function Home() {
               name={item.name}
               description={item.description}
               price={item.price}
-              image_plate={item.image_plate}
+              image_plate={item.image_plate || ""}
             />
           ))}
         </div>

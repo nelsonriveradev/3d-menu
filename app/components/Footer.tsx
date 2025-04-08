@@ -1,5 +1,13 @@
 import Link from "next/link";
-export default function Footer(props: any) {
+export default function Footer({
+  email,
+  restaurantName,
+  phoneNumber,
+}: {
+  email: string;
+  restaurantName: string;
+  phoneNumber: string;
+}) {
   return (
     <div className="grid grid-cols-2 py-2 gap-x-1">
       <div className="flex flex-col gap-y-2">
@@ -18,11 +26,11 @@ export default function Footer(props: any) {
       </div>
       <div className="flex flex-col gap-y-2">
         <Link href="/" className="font-bold text-lg">
-          {props.restaurantName}
+          {restaurantName}
         </Link>
         <div className="">
-          <p>{props.phoneNumber}</p>
-          <p className="text-sm">{props.email}</p>
+          <p>{phoneNumber}</p>
+          <p className="text-sm">{email}</p>
         </div>
       </div>
     </div>

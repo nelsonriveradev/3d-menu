@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import AddMenuItem from "./action";
 import { toast } from "sonner";
 
@@ -13,7 +13,7 @@ export interface ItemInfo {
   calories?: number;
   servings?: number;
   preparation_time?: string;
-  image_plate?: string;
+  image_plate?: string | "";
 }
 export default function Admin() {
   const [newMenuItem, setNewMenuItem] = useState<ItemInfo>();
@@ -53,9 +53,15 @@ export default function Admin() {
     };
     try {
       setNewMenuItem(newItem);
-    } catch (error) {}
-    console.log("Submitted from Client", newItem);
-    return AddMenuItem(newItem);
+    } catch (error) {
+      console.error(error);
+    }
+    console.log("Submitted from Client");
+    if (newMenuItem) {
+      return AddMenuItem(newMenuItem);
+    } else {
+      console.error("newMenuItem is undefined");
+    }
   }
 
   return (

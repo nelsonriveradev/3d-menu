@@ -1,5 +1,5 @@
 "use client";
-
+///<reference path="../../global.d.ts" />
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Script from "next/script";
@@ -50,7 +50,7 @@ export default function ARScene({
 
       {scriptLoaded ? (
         <div style={{ width: "100%", height: "400px" }}>
-          {/* @ts-ignore - model-viewer is a custom element */}
+          {/* @ts-expect-error - model-viewer is a custom element */}
           <model-viewer
             src={src || null} // Use null instead of empty string
             ios-src={iosSrc || null}
@@ -71,6 +71,7 @@ export default function ARScene({
                 />
               </span>
             </button>
+            {/* @ts-expect-error - model-viewer is a custom element */}
           </model-viewer>
         </div>
       ) : (
