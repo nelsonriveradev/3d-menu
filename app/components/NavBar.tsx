@@ -1,19 +1,21 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-Link;
+import { useRouter } from "next/navigation";
 
-export default function NavBar() {
+export default function NavBar({ homeHref }: { homeHref: string }) {
+  const router = useRouter();
   return (
-    <div className=" py-2 px-4 rounded-lg flex justify-center items-center gap-x-10 w-72 bg-zinc-800/40 backdrop-blur-sm ">
-      <Link href="#" prefetch={true} className="cursor-pointer">
+    <div className=" py-2 px-4 rounded-lg flex justify-between items-center gap-x-10 w-full   ">
+      <button onClick={() => router.back()} className="cursor-pointer">
         <Image
-          src="/Icons/icons8-back-100.png"
+          src="/Icons/icons8-back-64.png"
           alt="back btn illustration"
           width={30}
           height={30}
         />
-      </Link>
-      <Link href="/" prefetch={true} className="cursor-pointer">
+      </button>
+      <Link href={`${homeHref}`} prefetch={true} className="cursor-pointer">
         <Image
           src="/Icons/icons8-home-60.png"
           alt="home btn illustration"

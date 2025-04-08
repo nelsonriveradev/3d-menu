@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import DetailCards from "../components/DetailCards";
+import ARScene from "../components/ARScene";
 import { createClient } from "@/utils/supabase/client";
 export default async function ItemDetails({
   params,
@@ -18,7 +19,6 @@ export default async function ItemDetails({
   if (error) {
     console.log(error);
   }
-  console.log(menuItem);
 
   return (
     <div className="h-[100wh]">
@@ -100,17 +100,17 @@ export default async function ItemDetails({
             <p>{menuItem.description}</p>
           </div>
           <div className="mt-10">
-            <button className="cursor-pointer flex gap-x-1 text-zinc-200 justify-center mx-auto bg-zinc-800 rounded-2xl py-2 px-4 transition-all ease-in-out hover:scale-110 ">
-              Ver plato virtualmente{" "}
-              <span className=" transition-all hover:ease-in-out ease-in-out duration-100 hover:animate-bounce hover:delay-75">
-                <Image
-                  src="/Icons/icons8-ar-white-64.png"
-                  alt="Augmented Reality icon"
-                  width={24}
-                  height={24}
-                />
-              </span>
-            </button>
+            {menuItem.objects === null || menuItem.objects === false ? (
+              <p className="text-zinc-200">
+                Producto con vista virtual no disponible
+              </p>
+            ) : (
+              <ARScene
+                iosSrc={menuItem.objects[1] || ""}
+                alt={`${menuItem.name} 3D object`}
+                src={menuItem.objects[0] || ""}
+              />
+            )}
           </div>
         </div>
       </div>

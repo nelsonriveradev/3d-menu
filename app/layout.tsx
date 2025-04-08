@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
-import NavBar from "./components/NavBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,13 +29,20 @@ export default function RootLayout({
         name="viewport"
         content="width=device-width, initial-scale=1.0"
       ></meta>
+      <head>
+        <Script
+          type="module"
+          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
       >
         {children}
-        <div className=" bg-transparent fixed bottom-5 left-1/2 -translate-x-1/2 mx-auto  z-10">
+        {/* <div className=" bg-transparent fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto  z-10">
           <NavBar />
-        </div>
+        </div> */}
       </body>
     </html>
   );
