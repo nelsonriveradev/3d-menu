@@ -63,7 +63,7 @@ export default function Home() {
               name={item.name}
               description={item.description}
               price={item.price}
-              image_plate={item.image_plate || ""}
+              image_plate={(item.image_plate as string) || ""}
             />
           ))}
         </div>

@@ -2,6 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignInButton,
+  UserButton,
+  SignedOut,
+} from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,26 +31,38 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-      ></meta>
-      <head>
-        <Script
-          type="module"
-          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
-          strategy="beforeInteractive"
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
-      >
-        {children}
-        {/* <div className=" bg-transparent fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto  z-10">
+    <ClerkProvider>
+      <html lang="en">
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        ></meta>
+        <head>
+          <Script
+            type="module"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+            strategy="beforeInteractive"
+          />
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
+        >
+          <header>
+            <div className=" flex justify-end">
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+            </div>
+          </header>
+          {children}
+          {/* <div className=" bg-transparent fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto  z-10">
           <NavBar />
         </div> */}
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
