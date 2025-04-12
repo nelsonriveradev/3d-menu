@@ -1,6 +1,36 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+:root {
+  --color-primary: #ffd447;
+  --color-secondary: #ff8047;
+  --color-warm-white: #f9f9f9;
+  --color-soft-black: #232323;
+  --color-pure-white: #ffffff;
+
+  --color-warning: #facc15;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+}
+
+/* Optional: Dark mode theme (if you want to add later) */
+/* @media (prefers-color-scheme: dark) {
+  :root {
+    --color-primary: #ffd447;
+    --color-secondary: #ff8047;
+    --color-warm-white: #1a1a1a;
+    --color-soft-black: #f0f0f0;
+    --color-pure-white: #000000;
+
+    --color-warning: #facc15;
+    --color-danger: #f87171;
+    --color-success: #4ade80;
+    --color-info: #60a5fa;
+  }
+} */
+
+/* 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -44,9 +74,11 @@
 body {
   background: var(--background, #ffffff) !important;
   color: var(--foreground, #ffffff) !important;
-}
+} */
 
-:root {
+/* :root {
+  --warm-white: "#FFFBF2"
+
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -122,4 +154,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
+} */

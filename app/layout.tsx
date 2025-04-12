@@ -45,7 +45,7 @@ export default function RootLayout({
           />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4 bg-[var(--color-warm-white)] `}
         >
           <header>
             <div className=" flex justify-end">

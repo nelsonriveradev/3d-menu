@@ -1,80 +1,102 @@
 "use client";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import CategoryList from "./components/CategoryList";
+import Link from "next/link";
+import Card from "./components/Card";
 import Image from "next/image";
-import ItemCard from "./components/ItemCard";
-import { createClient } from "@/utils/supabase/client";
-import { useState, useEffect } from "react";
-import { ItemInfo } from "./admin/ingresar-plato/page";
-export default function Home() {
-  const supabase = createClient();
-  const [data, setData] = useState<ItemInfo[]>([]);
 
-  console.log("Data:", data);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: menuItems, error } = await supabase
-        .from("menu_items")
-        .select("*")
-        .range(0, 9);
-
-      if (error) {
-        console.error("Error fetching data:", error);
-      } else {
-        setData(menuItems);
-      }
-    };
-
-    fetchData();
-  }, [supabase]);
+export default function HomePage() {
   return (
     <div>
-      <header>
-        <Header restaurantName="Restaurante Prueba" reviewLink="#" />
-      </header>
-
-      <form className=" mt-5 py-2 px-4 bg-zinc-300 rounded-lg flex justify-start items-center gap-x-5">
-        <Image
-          className=""
-          src="/Icons/icons8-search-100.png"
-          alt="search icon"
-          width={16}
-          height={16}
-        />
-        <input
-          className="px-1 focus:outline-none focus:bg-zinc-300"
-          type="text"
-          placeholder="¿Que te antojas?"
-        />
-      </form>
-      <div className="mt-5">
-        <CategoryList />
-      </div>
-
-      <div className="mt-7">
-        <h1 className="text-xl">Te recomendamos</h1>
-
-        <div className="grid grid-cols-2 gap-x-4 gap-y-4">
-          {data.map((item) => (
-            <ItemCard
-              key={item.name}
-              name={item.name}
-              description={item.description}
-              price={item.price}
-              image_plate={(item.image_plate as string) || ""}
+      <div className="flex flex-col">
+        {/* hero */}
+        <div className="flex flex-col gap-y-3">
+          <h1 className="text-4xl font-bold text-center">
+            Los menus merecen algo mejor
+          </h1>
+          <p className="px-2 text-center italic text-base/5">
+            Better Menu ayuda a los restaurantes a dejar atras un menu monotono
+            en pdf a diseñar un menu dynamic e interactivo que brindará una
+            mejor experienciaa a los clientes que tu amas.
+          </p>
+          {/* CTA */}
+          <div className="flex justify-center items-center">
+            <Link
+              href={"/"}
+              className="bg-[var(--color-primary)]   text-center rounded-lg w-1/3 mx-auto px-2 py-1 shadow text-[var(--color-soft-black)]"
+            >
+              Comienza Gratis
+            </Link>
+            <Link
+              href={"/"}
+              className="bg-[var(--color-primary)]   text-center rounded-lg w-1/3 mx-auto px-2 py-1 shadow text-[var(--color-soft-black)]"
+            >
+              Miralo en acción
+            </Link>
+          </div>
+          <Image
+            className="place-self-center"
+            src={"/illustrations/hero illustration_1.png"}
+            alt="women using the phone "
+            width={300}
+            height={300}
+          />
+        </div>
+        {/* problem to solve */}
+        <div className="mt-10 ">
+          <h3 className="text-2xl font-semibold text-center">
+            El PDF ya pasó de moda
+          </h3>
+          {/* cards */}
+          <div className="flex flex-col items-center gap-y-5">
+            <Card
+              illustration="/illustrations/design-planning-with-brush.svg"
+              title="Statico y aburrido"
+              info="Dificil de navegar, son lento en cargar y no fue diseñado para la mejor experiencia."
             />
-          ))}
+            <Card
+              illustration="/illustrations/time-management.svg"
+              title="Se ve bien, pero es  antigüo"
+              info="Todavia los menus tienen uns structura antigüa viendo una larga lista sin ninguna interacción."
+            />
+            <Card
+              illustration="/illustrations/healthy-eating.svg"
+              title="Experiencia limitada"
+              info="No hay personalización, no hay filtros, no hay un flujo intuitivo. No solo se trata de como se ve, se trata de que funcione al cliente."
+            />
+            <div className="flex flex-col items-center mt-10">
+              <h3 className="text-3xl font-semibold text-center">
+                Better Menu resuelve todo esto problemas con fluidez
+              </h3>
+              <Image
+                src={"/illustrations/idea.svg"}
+                alt="girl in a computer"
+                width={500}
+                height={500}
+              />
+              <h3></h3>
+            </div>
+          </div>
         </div>
       </div>
-      <footer className="mt-10">
-        <Footer
-          restaurantName="Restaurante Prueba"
-          phoneNumber="787-123-4567"
-          email="restaurante.prueba@email.com"
-        />
-      </footer>
     </div>
   );
 }
+
+// 3. Features Overview
+// Keep this clean, like Notion. Maybe a vertical stack or icon grid.
+
+// Realtime updates
+
+// AI-generated sections
+
+// Upload your branding
+
+// Customer analytics (if you're planning for later)
+
+// 4. How It Works (Playful, Step-by-Step)
+// Step 1: Create your menu
+
+// Step 2: Add your items or let AI help
+
+// Step 3: Share your custom QR
+
+// Step 4: Update anytime — from your phone
