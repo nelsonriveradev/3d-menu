@@ -9,6 +9,8 @@ import {
   UserButton,
   SignedOut,
 } from "@clerk/nextjs";
+import Link from "next/link";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,9 +50,26 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4 bg-[var(--color-warm-white)] `}
         >
           <header>
-            <div className=" flex justify-end">
+            <div className=" flex justify-between">
+              <div className="">
+                <Link href={"/"}>
+                  <Image
+                    src={"/BetterMenu.png"}
+                    alt="Better Menu Logo"
+                    width={100}
+                    height={100}
+                  />
+                </Link>
+              </div>
               <SignedOut>
-                <SignInButton />
+                <SignInButton
+                  fallbackRedirectUrl={
+                    process.env.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+                  }
+                  signUpFallbackRedirectUrl={
+                    process.env.CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+                  }
+                />
               </SignedOut>
               <SignedIn>
                 <UserButton />

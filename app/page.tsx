@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Card from "./components/Card";
 import Image from "next/image";
-
+import Footer from "./components/Footer";
 export default function HomePage() {
   return (
     <div>
@@ -63,7 +63,7 @@ export default function HomePage() {
               info="No hay personalización, no hay filtros, no hay un flujo intuitivo. No solo se trata de como se ve, se trata de que funcione al cliente."
             />
             <div className="flex flex-col items-center mt-10">
-              <h3 className="text-3xl font-semibold text-center">
+              <h3 className="text-2xl font-semibold text-center">
                 Better Menu resuelve todo esto problemas con fluidez
               </h3>
               <Image
@@ -72,31 +72,37 @@ export default function HomePage() {
                 width={500}
                 height={500}
               />
-              <h3></h3>
             </div>
           </div>
         </div>
+        {/* como funciona */}
+        <div className="flex flex-col items-center mt-10">
+          <h1 className="text-4xl font-bold text-center">Como funciona?</h1>
+          <div className="flex flex-col gap-y-4 items-center mt-7">
+            <Card
+              illustration="/illustrations/Step 1.png"
+              title="1. Crea una cuenta"
+              info="Puedes crearla con tu correo personal o con Google"
+            />
+            <Card
+              illustration="/illustrations/Step 2.png"
+              title="2. Añade tus platos"
+              info="Organiza tu menú tal como quieres"
+            />
+            <Card
+              illustration="/illustrations/Step 3.png"
+              title="3. Comparte tu menú"
+              info="Puedes crear un QR code o usar tu enlace para compartir tu menú"
+            />
+            <Card
+              illustration="/illustrations/Step 4.png"
+              title="4. Actualiza tu menú"
+              info="Si hay cambios en tu restaurante puedes actualizarlo en cualquier momento desde tu celular o computadora."
+            />
+          </div>
+        </div>
+        <Footer />
       </div>
     </div>
   );
 }
-
-// 3. Features Overview
-// Keep this clean, like Notion. Maybe a vertical stack or icon grid.
-
-// Realtime updates
-
-// AI-generated sections
-
-// Upload your branding
-
-// Customer analytics (if you're planning for later)
-
-// 4. How It Works (Playful, Step-by-Step)
-// Step 1: Create your menu
-
-// Step 2: Add your items or let AI help
-
-// Step 3: Share your custom QR
-
-// Step 4: Update anytime — from your phone

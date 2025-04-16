@@ -1,38 +1,28 @@
 import Link from "next/link";
-export default function Footer({
-  email,
-  restaurantName,
-  phoneNumber,
-}: {
-  email: string;
-  restaurantName: string;
-  phoneNumber: string;
-}) {
+export default function Footer() {
   return (
-    <div className="grid grid-cols-2 py-2 gap-x-1">
-      <div className="flex flex-col gap-y-2">
-        <div className="flex flex-col">
-          <h4 className="text-xs ">Diseñado por</h4>
-          <h3 className="text-xl font-bold ">Nelson Rivera</h3>
+    <footer className="mt-20 bg-[var(--color-primary)] text-[var(--color-soft-black)] py-6 rounded-2xl">
+      <div className="container mx-auto px-4 flex flex-col items-center gap-y-2 text-center">
+        <h4 className="text-lg font-semibold">Better Menu</h4>
+        <p className="text-sm italic">
+          Revoluciona la forma en que compartes tu menú.
+        </p>
+        <div className="flex gap-x-4 mt-2">
+          <Link href="/terms" className="text-sm hover:underline">
+            Términos
+          </Link>
+          <Link href="/privacy" className="text-sm hover:underline">
+            Privacidad
+          </Link>
+          <Link href="/contact" className="text-sm hover:underline">
+            Contacto
+          </Link>
         </div>
-        <Link
-          className="active:scale-110 text-lg font-medium bg-zinc-700 text-zinc-100 rounded-xl py-1 px-2 text-center "
-          target="_blank"
-          href="https://nelsonrivera.me/"
-          prefetch={true}
-        >
-          Contactame 👨🏽‍💻
-        </Link>
+        <p className="text-xs mt-2">
+          © {new Date().getFullYear()} Better Menu. Todos los derechos
+          reservados.
+        </p>
       </div>
-      <div className="flex flex-col gap-y-2">
-        <Link href="/" className="font-bold text-lg">
-          {restaurantName}
-        </Link>
-        <div className="">
-          <p>{phoneNumber}</p>
-          <p className="text-sm">{email}</p>
-        </div>
-      </div>
-    </div>
+    </footer>
   );
 }
