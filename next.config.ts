@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["https://ba01-172-56-32-27.ngrok-free.app"],
   images: {
     remotePatterns: [
       {
@@ -8,6 +9,12 @@ const nextConfig: NextConfig = {
         hostname: "images.pexels.com",
         port: "",
         pathname: "/photos/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdmekkjaikfnlsyoahyw.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
       },
     ],
   },

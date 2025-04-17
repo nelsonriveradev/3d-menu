@@ -1,84 +1,159 @@
 "use client";
-
-import { useState } from "react"; // Import useState if needed for loading/error states
+import * as tus from "tus-js-client";
+import { useState, useRef } from "react"; // Import useState if needed for loading/error states
 import { RestaurantData } from "@/types";
+import { Skeleton } from "@/components/ui/skeleton";
 // import * as tus from "tus-js-client"; // Not directly used in this component
 import { useUser, useSession } from "@clerk/nextjs";
-import { handleOnboardingWithUpload } from "./action";
-import { toast } from "sonner"; // Import toast for feedback
+import {
+  createRestaurantRecord,
+  getLogoUploadPathInfo,
+  finalizeLogoUpload,
+} from "./action";
+import { toast } from "sonner";
+import { redirect } from "next/navigation";
+// Import toast for feedback
+// Supabase constants from environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const BUCKET_NAME = "logos"; // Match server-side
 
 export default function Onboarding() {
-  const { user, isLoaded: isUserLoaded } = useUser(); // Add isLoaded check
-  const { session, isLoaded: isSessionLoaded } = useSession(); // Add isLoaded check
-  const [isSubmitting, setIsSubmitting] = useState(false); // Optional: Loading state
+  const { user, isLoaded: isUserLoaded } = useUser();
+  const { session, isLoaded: isSessionLoaded } = useSession();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
-  // handleSubmit needs to be async to await the token
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setIsSubmitting(true); // Set loading state
-
-    // 1. Check if session is loaded and exists
-    if (!isSessionLoaded || !session) {
-      toast.error("Sesión no cargada o no disponible. Intenta de nuevo.");
-      setIsSubmitting(false);
+    if (!formRef.current) return;
+    if (!isSessionLoaded || !session || !supabaseUrl || !supabaseAnonKey) {
+      toast.error("Cliente no listo o configuración incompleta.");
       return;
     }
 
-    // 2. Get the Supabase token using the correct template name
-    let token: string | null = null;
-    try {
-      // *** IMPORTANT: Ensure you have a JWT template named "supabase" in Clerk ***
-      token = await session.getToken({ template: "supabase" });
-    } catch (error) {
-      console.error("Error getting Supabase token from Clerk:", error);
-      toast.error("Error al obtener token de autenticación.");
-      setIsSubmitting(false);
-      return;
-    }
+    setIsSubmitting(true);
+    let restaurantId: string | null = null; // To store the ID
+    let pathInfo: { path: string; publicUrl: string } | null = null;
+    let tusUploadSuccess = false;
 
-    // 3. Check if token was retrieved successfully
-    if (!token) {
-      toast.error("No se pudo obtener el token para Supabase.");
-      setIsSubmitting(false);
-      return;
-    }
-
-    // 4. Extract form data
-    const formData = new FormData(event.currentTarget);
-    const logoFile = formData.get("logo") as File | null; // Get file, check if null
-
-    // Basic validation for required fields
+    const formData = new FormData(formRef.current);
+    const logoFile = formData.get("logo") as File | null;
     const restaurantName = formData.get("restaurantName") as string;
+
+    // --- Validations ---
     if (!restaurantName) {
-      toast.error("El nombre del restaurante es requerido.");
+      toast.error("Nombre requerido.");
       setIsSubmitting(false);
       return;
     }
     if (!logoFile || logoFile.size === 0) {
-      toast.error("El logo es requerido.");
+      toast.error("Logo requerido.");
       setIsSubmitting(false);
       return;
     }
 
-    const newRestaurant: RestaurantData = {
+    const newRestaurantDetails: Omit<RestaurantData, "logo"> = {
       name: restaurantName,
       location: formData.get("location") as string,
-      phoneNumber: formData.get("phone") as number | null, // Consider parsing as string first
-      logo: logoFile, // Pass the File object
+      phoneNumber: formData.get("phone") as number | null, // Consider parsing
     };
 
-    // 5. Call the server action with the data and the token string
     try {
-      await handleOnboardingWithUpload(newRestaurant, token);
-      // Server action handles success/error toasts internally now
-      // Optionally reset form on success:
-      // (event.target as HTMLFormElement).reset();
-    } catch (error) {
-      // Catch potential errors if the server action itself throws unexpectedly
-      console.error("Error calling server action:", error);
-      toast.error("Ocurrió un error inesperado al procesar el formulario.");
+      // --- Stage 1: Create Restaurant Record ---
+      toast.info("Registrando detalles del restaurante...");
+      const createResult = await createRestaurantRecord(newRestaurantDetails);
+      if (createResult?.error || !createResult?.restaurantId) {
+        throw new Error(
+          createResult?.error || "No se pudo crear el registro del restaurante."
+        );
+      }
+      restaurantId = createResult.restaurantId;
+      toast.success("Detalles guardados. Preparando subida de logo...");
+
+      // --- Stage 2: Get Upload Path Info ---
+      const pathResult = await getLogoUploadPathInfo(
+        restaurantId!,
+        restaurantName,
+        logoFile.name
+      );
+      if (pathResult?.error || !pathResult?.path || !pathResult?.publicUrl) {
+        throw new Error(
+          pathResult?.error ||
+            "No se pudo obtener la información para subir el logo."
+        );
+      }
+      pathInfo = { path: pathResult.path, publicUrl: pathResult.publicUrl };
+
+      // --- Stage 3: Get Supabase Token ---
+      const supabaseAccessToken = await session?.getToken();
+
+      if (!supabaseAccessToken) {
+        toast.error("Error de autenticación: No se pudo obtener el token.");
+        return;
+      }
+      toast.info("Token obtenido. Subiendo logo...");
+
+      // --- Stage 4: Perform Tus Upload ---
+      await new Promise<void>((resolve, reject) => {
+        const tusEndpoint = `${supabaseUrl}/storage/v1/upload/resumable`;
+        const upload = new tus.Upload(logoFile, {
+          endpoint: tusEndpoint,
+          retryDelays: [0, 3000, 5000, 10000, 20000],
+          headers: {
+            Authorization: `Bearer ${supabaseAccessToken}`,
+            apikey: supabaseAnonKey,
+            // 'x-upsert': 'true', // Optional
+          },
+          metadata: {
+            bucketName: BUCKET_NAME,
+            objectName: pathInfo!.path, // Use path from server
+            contentType: logoFile.type,
+            // cacheControl: '3600',
+          },
+          chunkSize: 6 * 1024 * 1024,
+          onError: (error) =>
+            reject(new Error(`Error al subir logo: ${error.message || error}`)),
+          onProgress: (bytesUploaded, bytesTotal) =>
+            console.log(
+              `Logo: ${((bytesUploaded / bytesTotal) * 100).toFixed(2)}%`
+            ),
+          onSuccess: () => {
+            tusUploadSuccess = true;
+            resolve();
+          },
+        });
+        upload.start();
+      }); // End Tus Promise
+
+      if (!tusUploadSuccess) {
+        // Should have been caught by reject, but double-check
+        throw new Error("La subida del logo falló silenciosamente.");
+      }
+      toast.success("Logo subido. Guardando enlace...");
+
+      // --- Stage 5: Finalize - Update DB with URL ---
+      const finalizeResult = await finalizeLogoUpload(
+        restaurantId!,
+        restaurantName,
+        pathInfo.publicUrl
+      );
+      if (finalizeResult?.error) {
+        throw new Error(
+          finalizeResult.error ||
+            "Error al guardar la URL del logo en la base de datos."
+        );
+      }
+
+      toast.success("¡Restaurante y logo configurados con éxito!");
+      formRef.current?.reset();
+      redirect("/admin");
+    } catch (error: any) {
+      console.error("Onboarding process failed:", error);
+      toast.error(`Error: ${error.message}`);
+      // Consider cleanup steps if partial success (e.g., restaurant created but upload failed)
     } finally {
-      setIsSubmitting(false); // Reset loading state regardless of outcome
+      setIsSubmitting(false);
     }
   }
 
@@ -99,6 +174,7 @@ export default function Onboarding() {
 
         {/* Use the onSubmit handler */}
         <form
+          ref={formRef}
           onSubmit={handleSubmit} // Attach the handler here
           className="bg-zinc-200 px-2.5 py-2 rounded-2xl flex flex-col gap-y-4 w-full mt-6" // Added margin-top
         >

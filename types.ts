@@ -12,3 +12,11 @@ export type RestaurantData = {
   phoneNumber: number | null;
   logo: File;
 };
+
+export type Restaurant = {
+  name: string;
+  slug: string | null;
+  location: string;
+  phone: number | string;
+  logo_url: string;
+};
