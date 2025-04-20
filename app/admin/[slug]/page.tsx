@@ -59,7 +59,15 @@ export default function RestaurantAdmin() {
         {/* Lista */}
 
         <div className="flex flex-col gap-y-2">
-          <MenuItemCard
+          {menuItems.map((item) => (
+            <MenuItemCard
+              key={item.name}
+              name={item.name}
+              price={item.price}
+              imagePlate={item.image_plate}
+            />
+          ))}
+          {/* <MenuItemCard
             name="Plato 1"
             price={12}
             imagePlate="https://picsum.photos/100"
@@ -78,7 +86,7 @@ export default function RestaurantAdmin() {
             name="Plato 1"
             price={12}
             imagePlate="https://picsum.photos/100"
-          />
+          /> */}
         </div>
       </div>
     </div>

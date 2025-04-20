@@ -8,6 +8,8 @@ import { auth } from "@clerk/nextjs/server";
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseServiceRoleKey =
+  process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.error(
@@ -18,7 +20,61 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
+const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceRoleKey!, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
+  },
+});
+
 const BUCKET_NAME = "3d-objects"; // Your bucket name
+
+// upload image
+async function imageUpload(
+  image: File,
+  restaurantName: string,
+  itemName: string
+) {
+  try {
+    const fileName = image.name;
+    const sanitizedRestaurantName = restaurantName.replace(
+      /[^a-zA-Z0-9-_]/g,
+      "_"
+    );
+    const sanitizedItemName = itemName.replace(/[^a-zA-Z0-9-_]/g, "_");
+    const filePath = `${sanitizedRestaurantName}/${sanitizedItemName}/${fileName}`;
+    console.log(`Uploading image to path: ${filePath}`);
+    const { data: plateUpload, error: plateErrorUpload } =
+      await supabaseAdmin.storage.from("plates").upload(filePath, image, {
+        contentType: image.type,
+      });
+    if (plateUpload) {
+      console.log("succesfully upload!!!!!");
+    }
+    if (plateErrorUpload) {
+      console.log(
+        "Error uploading image Plate to storage bucket",
+        plateErrorUpload
+      );
+    }
+
+    // get url
+    const IMGURL = plateUpload?.path;
+    if (!IMGURL) {
+      console.error(
+        "Failed to upload image: plateUpload is null or undefined."
+      );
+    }
+    const { data: imageURL } = IMGURL
+      ? supabase.storage.from("plates").getPublicUrl(IMGURL)
+      : { data: null };
+
+    return { plateUpload, imageURL };
+  } catch (error) {
+    console.log("Error encontrado en subir foto: ", error);
+  }
+}
 
 // --- Add Menu Item Action (Corrected .select()) ---
 export async function AddMenuItem(newItem: /* ItemInfo */ any, slug: any) {
@@ -81,27 +137,12 @@ export async function AddMenuItem(newItem: /* ItemInfo */ any, slug: any) {
     console.log(`Using category ID: ${categoryId}`);
 
     // uploading image_plate:
-    const { data: plateUpload, error: plateErrorUpload } =
-      await supabase.storage
-        .from("plates")
-        .upload(
-          `${restaurantData.name}/${newItem.name}/.init`,
-          newItem.image_plate
-        );
-    if (plateUpload) {
-      console.log("succesfully upload!!!!!");
-    }
-    if (plateErrorUpload) {
-      console.log(
-        "Error uploading image Plate to storage bucket",
-        plateErrorUpload
-      );
-    }
-    const imageURL = supabase.storage
-      .from("plates")
-      .getPublicUrl(
-        `${restaurantData.name}/${newItem.name}/${newItem.image_plate.name}`
-      );
+
+    const imageResponse = await imageUpload(
+      newItem.image_plate,
+      restaurantData.name,
+      newItem.name
+    );
 
     // --- Insert Menu Item ---
     console.log(`Inserting menu item: ${newItem.name}`);
@@ -119,7 +160,7 @@ export async function AddMenuItem(newItem: /* ItemInfo */ any, slug: any) {
           calories: newItem.calories,
           preparation_time: newItem.preparation_time,
           restaurant_id: restaurantID, // *** ADDED: Link menu item to restaurant ***
-          image_plate: imageURL.data.publicUrl, // Handle image URL if needed
+          image_plate: imageResponse?.imageURL?.publicUrl, // Handle image URL if needed
         },
       ])
       .select("uid") // *** Select the 'uid' column ***

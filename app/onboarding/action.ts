@@ -10,7 +10,7 @@ const supabaseServiceRoleKey =
   process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error("Supabase URL or Service Role Key missing.");
+  console.error("*------------ Supabase URL or Service Role Key missing.");
   // Handle error
 }
 
@@ -36,6 +36,7 @@ export async function createRestaurantRecord(
 
   try {
     console.log(`Creating restaurant record for user: ${user.id}`);
+    console.log("-------------------------------------");
     const { data, error } = await supabaseAdmin
       .from("restaurants") // Your table name
       .insert([
@@ -51,7 +52,7 @@ export async function createRestaurantRecord(
       .single();
 
     if (error) {
-      console.error("Error inserting restaurant:", error);
+      console.error("*------------ Error inserting restaurant:", error);
       // Check for unique constraint violation if name should be unique per user etc.
       if (error.code === "23505") {
         // Example: unique violation code
@@ -66,10 +67,15 @@ export async function createRestaurantRecord(
     }
 
     console.log("Restaurant record created successfully:", data);
+    console.log("-------------------------------------");
+
     // Return the new restaurant ID
     return { success: true, restaurantId: data.id, restaurantName: data.name };
   } catch (error: any) {
-    console.error("Unexpected error creating restaurant record:", error);
+    console.error(
+      "*--------------- Unexpected error creating restaurant record:",
+      error
+    );
     return { error: `Error inesperado: ${error.message}` };
   }
 }
@@ -123,6 +129,8 @@ export async function finalizeLogoUpload(
     console.log(
       `Updating restaurant ${restaurantId}-${restaurantName} with logo URL: ${logoPublicUrl}`
     );
+    console.log("-------------------------------------");
+
     const { data, error } = await supabaseAdmin
       .from("restaurants")
       .update({ logo_url: logoPublicUrl }) // Your logo URL column name
@@ -132,7 +140,10 @@ export async function finalizeLogoUpload(
       .single();
 
     if (error) {
-      console.error("Error updating restaurant with logo URL:", error);
+      console.error(
+        "*--------------- Error updating restaurant with logo URL:",
+        error
+      );
       return { error: `Error al guardar URL del logo: ${error.message}` };
     }
     if (!data?.id) {
@@ -140,9 +151,14 @@ export async function finalizeLogoUpload(
     }
 
     console.log("Restaurant logo URL updated successfully for ID:", data.id);
+    console.log("-------------------------------------");
+
     return { success: true };
   } catch (error: any) {
-    console.error("Unexpected error finalizing logo upload:", error);
+    console.error(
+      "*----------- Unexpected error finalizing logo upload:",
+      error
+    );
     return { error: `Error inesperado: ${error.message}` };
   }
 }
