@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["https://ba01-172-56-32-27.ngrok-free.app"],
+  allowedDevOrigins: ["https://f183-172-59-19-146.ngrok-free.app"],
   images: {
     remotePatterns: [
       {
@@ -15,6 +15,18 @@ const nextConfig: NextConfig = {
         hostname: "cdmekkjaikfnlsyoahyw.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
+      },
+      {
+        protocol: "https",
+        hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+        port: "",
+        pathname: "/**",
       },
     ],
   },

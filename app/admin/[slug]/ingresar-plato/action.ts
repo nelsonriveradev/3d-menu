@@ -1,101 +1,9 @@
-// "use server";
-// import { ItemInfo, ItemFiles } from "./page";
-// import { createClient } from "@supabase/supabase-js";
-// import { toast } from "sonner";
-// //file object interface
-
-// const supabase = createClient(
-//   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-//   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-// );
-// export async function AddMenuItem(newItem: ItemInfo) {
-//   try {
-//     const { data, error } = await supabase
-//       .from("menu_items")
-//       .insert([
-//         {
-//           name: newItem.name,
-//           description: newItem.description,
-//           options: newItem.option,
-//           price: newItem.price,
-//           category: newItem.category,
-//           calories: newItem.calories,
-//           preparation_time: newItem.preparation_time,
-//         },
-//       ])
-//       .select();
-
-//     if (error) {
-//       console.error(error);
-//     }
-//     console.log("Submitted to Supabase", data);
-//     return { data };
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-// export async function uploadItemFiles(
-//   newItemFiles: ItemFiles,
-//   itemData: ItemInfo
-// ) {
-//   try {
-//     if (!newItemFiles.objectGLB || !newItemFiles.objectUSDZ) {
-//       throw new Error("Missing files for upload");
-//     }
-
-//     const objectGLBExtension = newItemFiles.objectGLB.name.split(".").pop();
-//     const objectUSDZExtension = newItemFiles.objectUSDZ.name.split(".").pop();
-
-//     const fileName = itemData.name;
-
-//     console.log("Uploading files to Supabase storage...");
-//     console.log("GLB File:", newItemFiles.objectGLB);
-//     console.log("USDZ File:", newItemFiles.objectUSDZ);
-
-//     const [objectGLB, objectUSDZ] = await Promise.all([
-//       supabase.storage
-//         .from("3d-objects")
-//         .upload(`${fileName}-objects/model.glb`, newItemFiles.objectGLB, {
-//           cacheControl: "3600",
-//           upsert: true,
-//           contentType: "model/gltf-binary",
-//         }),
-//       supabase.storage
-//         .from("3d-objects")
-//         .upload(`${fileName}-objects/model.usdz`, newItemFiles.objectUSDZ, {
-//           cacheControl: "3600",
-//           upsert: true,
-//           contentType: "model/vnd.usdz+zip",
-//         }),
-//     ]);
-
-//     if (objectGLB.error || objectUSDZ.error) {
-//       console.error(
-//         "Error uploading files:",
-//         objectGLB.error,
-//         objectUSDZ.error
-//       );
-//       toast.error("Error al subir archivos");
-//       return;
-//     }
-
-//     console.log("Files uploaded successfully:", {
-//       glb: objectGLB.data.path,
-//       usdz: objectUSDZ.data.path,
-//     });
-//     toast.success("Archivos subidos correctamente.");
-//   } catch (error) {
-//     console.error("Error uploading files:", error);
-//     toast.error("Lo siento, hubo un error al subir archivos");
-//   }
-// }
-
 "use server";
 // Assuming ItemInfo and ItemFiles interfaces are defined correctly elsewhere
 // import { ItemInfo, ItemFiles } from "./page";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { auth } from "@clerk/nextjs/server";
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -113,9 +21,91 @@ const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 const BUCKET_NAME = "3d-objects"; // Your bucket name
 
 // --- Add Menu Item Action (Corrected .select()) ---
-export async function AddMenuItem(newItem: /* ItemInfo */ any) {
+export async function AddMenuItem(newItem: /* ItemInfo */ any, slug: any) {
   try {
-    const { data, error } = await supabase
+    const { userId } = await auth();
+    if (!userId) {
+      console.error("Authentication error: User ID not found.");
+      return { error: "User not authenticated." };
+    }
+    if (!slug) {
+      console.error("Error: Slug parameter is missing.");
+      return { error: "Restaurant identifier (slug) is missing." };
+    }
+
+    console.log(`Fetching restaurant for user: ${userId}, slug: ${slug}`);
+    const { data: restaurantData, error: errorRestaurantID } = await supabase
+      .from("restaurants")
+      .select("*") // Only select the ID
+      .eq("user_id", userId)
+      .eq("slug", slug)
+      .single(); // Use single to expect one row
+
+    if (errorRestaurantID) {
+      console.error("Supabase error fetching restaurant:", errorRestaurantID);
+      return {
+        error: `Database error finding restaurant: ${errorRestaurantID.message}`,
+      };
+    }
+    if (!restaurantData) {
+      console.error(`Restaurant not found for user ${userId} and slug ${slug}`);
+      return { error: "Restaurant not found or access denied." };
+    }
+    const restaurantID = restaurantData.id; // Extract the ID
+    console.log(`Found restaurant ID: ${restaurantID}`);
+
+    // --- Upsert Category ---
+    // Try to find existing category first, or insert if not found
+    console.log(
+      `Upserting category: ${newItem.category} for restaurant: ${restaurantID}`
+    );
+    const { data: categoryData, error: categoryError } = await supabase
+      .from("category")
+      .insert({ name: newItem.category, restaurant_id: restaurantID }) // Define conflict target
+      .select("id") // Select the ID after upsert
+      .single(); // Expect one row back
+
+    if (categoryError) {
+      console.error("Supabase error upserting category:", categoryError);
+      return {
+        error: `Database error managing category: ${categoryError.message}`,
+      };
+    }
+    if (!categoryData) {
+      console.error(
+        `Failed to upsert or retrieve category: ${newItem.category}`
+      );
+      return { error: "Failed to process category." };
+    }
+    const categoryId = categoryData.id; // Extract the ID
+    console.log(`Using category ID: ${categoryId}`);
+
+    // uploading image_plate:
+    const { data: plateUpload, error: plateErrorUpload } =
+      await supabase.storage
+        .from("plates")
+        .upload(
+          `${restaurantData.name}/${newItem.name}/.init`,
+          newItem.image_plate
+        );
+    if (plateUpload) {
+      console.log("succesfully upload!!!!!");
+    }
+    if (plateErrorUpload) {
+      console.log(
+        "Error uploading image Plate to storage bucket",
+        plateErrorUpload
+      );
+    }
+    const imageURL = supabase.storage
+      .from("plates")
+      .getPublicUrl(
+        `${restaurantData.name}/${newItem.name}/${newItem.image_plate.name}`
+      );
+
+    // --- Insert Menu Item ---
+    console.log(`Inserting menu item: ${newItem.name}`);
+    const { data: menuItemData, error: menuItemError } = await supabase
       .from("menu_items") // Your table name
       .insert([
         {
@@ -124,32 +114,43 @@ export async function AddMenuItem(newItem: /* ItemInfo */ any) {
           description: newItem.description,
           options: newItem.option, // Assumes 'options' column is text[] or jsonb
           price: newItem.price,
-          category: newItem.category,
+          category_id: categoryId, // *** CHANGED: Use correct foreign key name if different ***
           // objects: newItem.objects, // Add if you have an 'objects' field in ItemInfo
           calories: newItem.calories,
           preparation_time: newItem.preparation_time,
-          // image_plate: newItem.image_plate, // Handle image URL if needed
+          restaurant_id: restaurantID, // *** ADDED: Link menu item to restaurant ***
+          image_plate: imageURL.data.publicUrl, // Handle image URL if needed
         },
       ])
-      .select("uid") // *** CHANGED: Select the 'uid' column ***
-      .single();
+      .select("uid") // *** Select the 'uid' column ***
+      .single(); // Expect one row back
 
-    if (error) {
-      console.error("Supabase insert error:", error);
-      return { error: `Database error: ${error.message}` };
+    if (menuItemError) {
+      console.error("Supabase insert menu item error:", menuItemError);
+      return {
+        error: `Database error creating menu item: ${menuItemError.message}`,
+      };
     }
-    // *** CHANGED: Check for data.uid ***
-    if (!data?.uid) {
+    // *** CHANGED: Check for menuItemData and menuItemData.uid ***
+    if (!menuItemData?.uid) {
+      console.error(
+        "Failed to create menu item or retrieve UID. Data:",
+        menuItemData
+      );
       return { error: "Failed to create menu item or retrieve UID." };
     }
 
-    console.log("Menu Item Created in Supabase with UID:", data.uid);
-    // *** CHANGED: Return data.uid ***
+    const menuItemUid = menuItemData.uid;
+    console.log("Menu Item Created in Supabase with UID:", menuItemUid);
+    // *** Return data.uid ***
     // The client-side variable can still be called createdItemId, but it holds the UID value
-    return { data: { id: data.uid } }; // Keep 'id' key consistent for client if preferred, but value is UID
+    return { data: { id: menuItemUid } }; // Keep 'id' key consistent for client if preferred, but value is UID
   } catch (error: any) {
-    console.error("Error in AddMenuItem:", error);
-    return { error: error.message || "An unexpected error occurred." };
+    // Catch unexpected errors (e.g., from auth(), network issues)
+    console.error("Unexpected error in AddMenuItem:", error);
+    // Check if it's a Supabase error object with a message
+    const message = error.message || "An unexpected error occurred.";
+    return { error: message };
   }
 }
 

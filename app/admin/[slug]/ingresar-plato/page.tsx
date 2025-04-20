@@ -1,5 +1,6 @@
 "use client";
 import { useState, useTransition, useEffect } from "react";
+import { useParams } from "next/navigation";
 import * as tus from "tus-js-client";
 // Import the server actions
 import {
@@ -39,6 +40,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const BUCKET_NAME = "3d-objects"; // Match server-side
 export default function Admin() {
+  //params
+  const { slug } = useParams();
   const [tab, setTab] = useState<string>("details");
   const [options, setOptions] = useState<string[]>([]);
   // This state variable will hold the UID value returned from AddMenuItem
@@ -249,15 +252,15 @@ export default function Admin() {
       description: formData.get("description") as string,
       option: options,
       price: parseFloat(formData.get("price") as string) || 0,
+      category: formData.get("category") as string,
       calories: parseInt(formData.get("calories") as string) || 0,
       preparation_time: formData.get("time") as string,
-      category: formData.get("category") as string,
       image_plate: formData.get("image_plate") as File | null,
     };
 
     startDetailsTransition(async () => {
       try {
-        const response = await AddMenuItem(newItem);
+        const response = await AddMenuItem(newItem, slug);
 
         // response.data.id now correctly contains the UID value from the server
         if (response?.error || !response?.data?.id) {

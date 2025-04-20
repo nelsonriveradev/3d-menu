@@ -6,7 +6,7 @@ import Image from "next/image";
 import ItemCard from "../components/ItemCard";
 import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
-import { ItemInfo } from "../admin/ingresar-plato/page";
+import { ItemInfo } from "../admin/[slug]/ingresar-plato/page";
 export default function Home() {
   const supabase = createClient();
   const [data, setData] = useState<ItemInfo[]>([]);

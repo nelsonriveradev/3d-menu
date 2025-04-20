@@ -72,7 +72,22 @@ export default function RootLayout({
                 />
               </SignedOut>
               <SignedIn>
-                <UserButton />
+                <div className="flex gap-x-4 items-center">
+                  <UserButton />
+                  <Link
+                    className="transition-all ease-in-out duration-100 active:scale-110 hover:scale-110"
+                    href={`/admin`}
+                    prefetch={true}
+                  >
+                    <Image
+                      src={`/Icons/icons8-plate-96.png`}
+                      alt="admin icon"
+                      width={30}
+                      height={30}
+                      loading="lazy"
+                    />
+                  </Link>
+                </div>
               </SignedIn>
             </div>
           </header>

@@ -28,26 +28,30 @@ export default function Admin() {
       );
       const { data: RestaurantList, error } = await supabase
         .from("restaurants")
-        .select();
+        .select()
+        .eq("user_id", user?.id);
 
       setRestaurants(RestaurantList);
     }
     getRestaurant();
   }, [isLoaded, user, getToken]);
-  console.log(restaurants);
   return (
     <div>
-      <h1>Admin Page</h1>
       {isLoaded ? (
         <>
-          <p>{user?.emailAddresses[0]?.emailAddress}</p>
+          <p className="text-xl font-semibold text-center mb-5">
+            {user?.emailAddresses[0]?.emailAddress}
+          </p>
           {restaurants?.map((rest: Restaurant) => (
             <RestaurantCard restaurant={rest} key={rest.slug} />
           ))}
         </>
       ) : (
-        <div className="flex">
+        <div className="flex flex-col gap-y-5">
           <Skeleton className="w-[200px] h-[25px] bg-zinc-200" />
+          <div className="flex">
+            <Skeleton className="w-[300px] h-[100px] bg-zinc-200" />
+          </div>
         </div>
       )}
     </div>
