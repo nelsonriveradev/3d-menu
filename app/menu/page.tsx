@@ -4,11 +4,10 @@ import Footer from "../components/Footer";
 import CategoryList from "../components/CategoryList";
 import Image from "next/image";
 import ItemCard from "../components/ItemCard";
-import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect } from "react";
 import { ItemInfo } from "../admin/[slug]/ingresar-plato/page";
+import { supabase } from "@/lib/supabase/supabaseClient";
 export default function Home() {
-  const supabase = createClient();
   const [data, setData] = useState<ItemInfo[]>([]);
 
   console.log("Data:", data);
@@ -69,11 +68,7 @@ export default function Home() {
         </div>
       </div>
       <footer className="mt-10">
-        <Footer
-          restaurantName="Restaurante Prueba"
-          phoneNumber="787-123-4567"
-          email="restaurante.prueba@email.com"
-        />
+        <Footer />
       </footer>
     </div>
   );

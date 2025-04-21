@@ -4,11 +4,17 @@ export default function MenuItemCard({
   name,
   imagePlate,
   price,
+  itemId,
+  deleteItem,
 }: {
   name: string;
   imagePlate: string;
   price: number | string;
+  itemId: string;
+  deleteItem: (itemId: string) => void;
 }) {
+  // delete function
+
   return (
     <div className="flex px-4 py-2 bg-zinc-300 rounded-2xl items-center gap-x-3 shadow-md">
       <Image
@@ -33,7 +39,10 @@ export default function MenuItemCard({
           />
         </button>
         {/* delete btn */}
-        <button>
+        <button
+          onClick={() => deleteItem(itemId)}
+          className="transition-all duration-100 ease-in-out active:scale-110 hover:scale-105 hover:border-2 rounded-lg hover:p-2.5"
+        >
           <Image
             src={`/Icons/icons8-delete-96.png`}
             alt="delete plate trash can icon"

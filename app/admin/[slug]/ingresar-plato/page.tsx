@@ -324,7 +324,6 @@ export default function Admin() {
               <div className="flex flex-col justify-center">
                 <label className="font-semibold">Categoria</label>
                 <input
-                  required
                   name="category" // Ensure name matches server expectation if needed
                   placeholder="Pasta en salsa de la casa"
                   className="bg-zinc-500 text-zinc-100 rounded-lg px-2 py-1 "

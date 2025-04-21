@@ -4,6 +4,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { auth } from "@clerk/nextjs/server";
+import { supabase } from "@/lib/supabase/supabaseClient";
 
 // Initialize Supabase Client
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,8 +18,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
   // Handle error
 }
-
-const supabase = createClient(supabaseUrl!, supabaseAnonKey!);
 
 const supabaseAdmin = createClient(supabaseUrl!, supabaseServiceRoleKey!, {
   auth: {
