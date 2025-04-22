@@ -136,55 +136,82 @@ export async function AddMenuItem(newItem: /* ItemInfo */ any, slug: any) {
     console.log(`Using category ID: ${categoryId}`);
 
     // uploading image_plate:
+    // if new Item do not have image file
+    if (!newItem.image_plate) {
+      const { data: menuItemData, error: menuItemError } = await supabase
+        .from("menu_items") // Your table name
+        .insert([
+          {
+            // Ensure these field names match your ItemInfo and table columns
+            name: newItem.name,
+            description: newItem.description,
+            options: newItem.option, // Assumes 'options' column is text[] or jsonb
+            price: newItem.price,
+            category_id: categoryId, // *** CHANGED: Use correct foreign key name if different ***
+            // objects: newItem.objects, // Add if you have an 'objects' field in ItemInfo
+            calories: newItem.calories,
+            preparation_time: newItem.preparation_time,
+            restaurant_id: restaurantID, // *** ADDED: Link menu item to restaurant ***
+          },
+        ])
+        .select("uid") // *** Select the 'uid' column ***
+        .single(); // Expect one row back
 
-    const imageResponse = await imageUpload(
-      newItem.image_plate,
-      restaurantData.name,
-      newItem.name
-    );
-
-    // --- Insert Menu Item ---
-    console.log(`Inserting menu item: ${newItem.name}`);
-    const { data: menuItemData, error: menuItemError } = await supabase
-      .from("menu_items") // Your table name
-      .insert([
-        {
-          // Ensure these field names match your ItemInfo and table columns
-          name: newItem.name,
-          description: newItem.description,
-          options: newItem.option, // Assumes 'options' column is text[] or jsonb
-          price: newItem.price,
-          category_id: categoryId, // *** CHANGED: Use correct foreign key name if different ***
-          // objects: newItem.objects, // Add if you have an 'objects' field in ItemInfo
-          calories: newItem.calories,
-          preparation_time: newItem.preparation_time,
-          restaurant_id: restaurantID, // *** ADDED: Link menu item to restaurant ***
-          image_plate: imageResponse?.imageURL?.publicUrl, // Handle image URL if needed
-        },
-      ])
-      .select("uid") // *** Select the 'uid' column ***
-      .single(); // Expect one row back
-
-    if (menuItemError) {
-      console.error("Supabase insert menu item error:", menuItemError);
-      return {
-        error: `Database error creating menu item: ${menuItemError.message}`,
-      };
-    }
-    // *** CHANGED: Check for menuItemData and menuItemData.uid ***
-    if (!menuItemData?.uid) {
-      console.error(
-        "Failed to create menu item or retrieve UID. Data:",
-        menuItemData
+      if (menuItemError) {
+        console.error("Supabase insert menu item error:", menuItemError);
+        return {
+          error: `Database error creating menu item: ${menuItemError.message}`,
+        };
+      }
+    } else {
+      const imageResponse = await imageUpload(
+        newItem.image_plate,
+        restaurantData.name,
+        newItem.name
       );
-      return { error: "Failed to create menu item or retrieve UID." };
-    }
+      // --- Insert Menu Item ---
+      console.log(`Inserting menu item: ${newItem.name}`);
+      const { data: menuItemData, error: menuItemError } = await supabase
+        .from("menu_items") // Your table name
+        .insert([
+          {
+            // Ensure these field names match your ItemInfo and table columns
+            name: newItem.name,
+            description: newItem.description,
+            options: newItem.option, // Assumes 'options' column is text[] or jsonb
+            price: newItem.price,
+            category_id: categoryId, // *** CHANGED: Use correct foreign key name if different ***
+            // objects: newItem.objects, // Add if you have an 'objects' field in ItemInfo
+            calories: newItem.calories,
+            preparation_time: newItem.preparation_time,
+            restaurant_id: restaurantID, // *** ADDED: Link menu item to restaurant ***
+            image_plate: imageResponse?.imageURL?.publicUrl, // Handle image URL if needed
+          },
+        ])
+        .select("uid") // *** Select the 'uid' column ***
+        .single(); // Expect one row back
 
-    const menuItemUid = menuItemData.uid;
-    console.log("Menu Item Created in Supabase with UID:", menuItemUid);
-    // *** Return data.uid ***
-    // The client-side variable can still be called createdItemId, but it holds the UID value
-    return { data: { id: menuItemUid } }; // Keep 'id' key consistent for client if preferred, but value is UID
+      if (menuItemError) {
+        console.error("Supabase insert menu item error:", menuItemError);
+        return {
+          error: `Database error creating menu item: ${menuItemError.message}`,
+        };
+      }
+      // *** CHANGED: Check for menuItemData and menuItemData.uid ***
+      if (!menuItemData?.uid) {
+        console.error(
+          "Failed to create menu item or retrieve UID. Data:",
+          menuItemData
+        );
+        return { error: "Failed to create menu item or retrieve UID." };
+      }
+
+      const menuItemUid = menuItemData.uid;
+      console.log("Menu Item Created in Supabase with UID:", menuItemUid);
+      // *** Return data.uid ***
+      // The client-side variable can still be called createdItemId, but it holds the UID value
+      return { data: { id: menuItemUid } }; // Keep 'id' key consistent for client if preferred, but value is UID
+    }
   } catch (error: any) {
     // Catch unexpected errors (e.g., from auth(), network issues)
     console.error("Unexpected error in AddMenuItem:", error);

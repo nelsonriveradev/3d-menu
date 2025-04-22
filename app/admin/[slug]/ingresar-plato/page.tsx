@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, ChangeEvent } from "react";
 import { useParams } from "next/navigation";
 import * as tus from "tus-js-client";
 // Import the server actions
@@ -9,8 +9,8 @@ import {
   finalizeItemFileUpload,
 } from "./action"; // Ensure this path is correct
 import { toast } from "sonner";
-import { createClient } from "@/utils/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { supabase } from "@/lib/supabase/supabaseClient";
 
 // Interfaces (keep as they are)
 export interface ItemFiles {
@@ -44,18 +44,79 @@ export default function Admin() {
   const { slug } = useParams();
   const [tab, setTab] = useState<string>("details");
   const [options, setOptions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [categoryInput, setCategoryInput] = useState<string>("");
+  const [restaurantData, setRestaurantData] = useState<
+    { id: any; name: any }[] | null
+  >(null);
   // This state variable will hold the UID value returned from AddMenuItem
   const [createdItemId, setCreatedItemId] = useState<string | null>(null);
   // Loading states
   const [isSubmittingDetails, startDetailsTransition] = useTransition();
   const [isUploadingFiles, startUploadTransition] = useTransition();
-  const [supabase, setSupabase] = useState<ReturnType<
-    typeof createClient
-  > | null>(null);
 
   useEffect(() => {
-    setSupabase(createClient()); // Initialize Supabase client on component mount
-  }, []);
+    async function fetchCategories() {
+      if (
+        !restaurantData ||
+        restaurantData.length === 0 ||
+        !restaurantData[0].id
+      ) {
+        console.log("Cannot fetch categories without restaurant ID.");
+        setSuggestions([]);
+        return;
+      }
+
+      const { data: fetchedCategory, error: fetchedError } = await supabase
+        .from("category")
+        .select("id, name")
+        .ilike("name", `%${categoryInput}%`)
+        .eq("restaurant_id", restaurantData[0].id);
+
+      if (fetchedError) {
+        console.error("Error fetching the categories:", fetchedError);
+        setSuggestions([]);
+      } else {
+        setSuggestions(
+          fetchedCategory
+            ? fetchedCategory.map((category: any) => category.name)
+            : []
+        );
+      }
+    }
+
+    if (categoryInput.trim() !== "") {
+      fetchCategories();
+    } else {
+      setSuggestions([]); // Clear if input is empty
+    }
+  }, [categoryInput, restaurantData]);
+
+  useEffect(() => {
+    async function getRestaurant() {
+      if (!supabase) {
+        console.error("Supabase client is not initialized.");
+        return;
+      }
+
+      const { data: restaurant, error: errorRestaurant } = await supabase
+        .from("restaurants")
+        .select("id, name")
+        .eq("slug", slug)
+        .single();
+
+      if (errorRestaurant) {
+        console.error(
+          "*------------ Error fetching Restaurant in ingresar plato page: ",
+          errorRestaurant
+        );
+      } else {
+        setRestaurantData([restaurant]);
+      }
+    }
+
+    getRestaurant();
+  }, [supabase, slug]);
   // optionHandle remains the same
   function optionHandle(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -283,7 +344,39 @@ export default function Admin() {
       }
     });
   }
+  //fetch restaurant
 
+  //fetching Category
+  async function fetchCategory(restaurantInfo: any) {
+    if (!restaurantInfo?.id) {
+      console.log("Cannot fetch categories without restaurant ID.");
+      setSuggestions([]); // Clear suggestions if no ID
+      return;
+    }
+    const { data: fetchedCategory, error: fetchedError } = await supabase
+      .from("category")
+      .select("id, name")
+      .ilike("name", `%${categoryInput}%`)
+      .eq("restaurant_id", restaurantInfo.id);
+    if (fetchedError) {
+      console.log("Error fetching the categories", fetchCategory);
+    }
+
+    setSuggestions(
+      fetchedCategory
+        ? fetchedCategory.map((category: any) => category.name)
+        : []
+    );
+  }
+  function onChangeCategoryHandle(e: ChangeEvent<HTMLInputElement>) {
+    setCategoryInput(e.target.value);
+    if (!restaurantData) {
+      console.error("Restaurant data is null.");
+      return;
+    }
+    const data = restaurantData[0];
+    fetchCategory(data?.id);
+  }
   // --- RETURN JSX (No changes needed related to ID/UID) ---
   return (
     <div>
@@ -324,10 +417,19 @@ export default function Admin() {
               <div className="flex flex-col justify-center">
                 <label className="font-semibold">Categoria</label>
                 <input
-                  name="category" // Ensure name matches server expectation if needed
-                  placeholder="Pasta en salsa de la casa"
+                  name="category"
+                  value={categoryInput} // Ensure name matches server expectation if needed
+                  placeholder="Escribe o selecciona categoria"
                   className="bg-zinc-500 text-zinc-100 rounded-lg px-2 py-1 "
+                  onChange={(e) => setCategoryInput(e.target.value)}
                 />
+                {suggestions.length > 0 && (
+                  <ul className="flex justify-evenly items-center">
+                    {suggestions.map((cat) => (
+                      <li key={cat}>{cat}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
               <div className="flex flex-col justify-center w-full">
                 <label className="font-semibold">opciones</label>
