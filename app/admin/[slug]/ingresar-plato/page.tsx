@@ -1,18 +1,11 @@
 "use client";
-import { useState, useTransition, useEffect, ChangeEvent } from "react";
+import { useState } from "react"; // Keep useState for basic UI state like tabs
 import { useParams } from "next/navigation";
-import * as tus from "tus-js-client";
-// Import the server actions
-import {
-  AddMenuItem,
-  getItemFilePaths,
-  finalizeItemFileUpload,
-} from "./action"; // Ensure this path is correct
-import { toast } from "sonner";
+// Removed tus, server actions, supabase client, useTransition, useEffect, ChangeEvent
+import { toast } from "sonner"; // Keep toast if you plan to add feedback later
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { supabase } from "@/lib/supabase/supabaseClient";
 
-// Interfaces (keep as they are)
+// Interfaces can remain if they define the structure you aim for
 export interface ItemFiles {
   objectGLB?: File | null;
   objectUSDZ?: File | null;
@@ -25,22 +18,20 @@ export interface ItemInfo {
   price: number;
   category?: string;
   calories?: number;
-  servings?: number; // This field wasn't in your schema, remove if not needed
+  servings?: number;
   preparation_time?: string;
-  image_plate?: string | File | null; // Handle image upload if needed
+  image_plate?: string | File | null;
 }
 
-// Define the expected structure of the data returned by prepareItemFileUploads
 interface FilePathData {
   glb: { publicUrl: string; path: string };
   usdz: { publicUrl: string; path: string };
 }
-// Define Supabase constants from environment variables
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const BUCKET_NAME = "3d-objects"; // Match server-side
+
+// Removed Supabase constants
+
 export default function Admin() {
-  //params - Keep if slug is needed for display or static links
+  // params - Keep if slug is needed for display or static links
   const { slug } = useParams();
   // Basic UI state like the active tab can remain
   const [tab, setTab] = useState<string>("details");
