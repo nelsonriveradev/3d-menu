@@ -17,21 +17,6 @@ export default function Admin() {
 
     async function getRestaurant() {
       const token = await getToken();
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          global: {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        }
-      );
-      const { data: RestaurantList, error } = await supabase
-        .from("restaurants")
-        .select()
-        .eq("user_id", user?.id);
-
-      setRestaurants(RestaurantList);
     }
     getRestaurant();
   }, [isLoaded, user, getToken]);

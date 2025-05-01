@@ -1,8 +1,8 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 
-const MONGO_URI = process.env.MONGO_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGO_URI) {
+if (!MONGODB_URI) {
   throw new Error(
     "Please define the MONGODB_URI environment variable inside .env.local"
   );
@@ -29,14 +29,14 @@ if (process.env.NODE_ENV === "development") {
   // is preserved across module reloads caused by HMR (Hot Module Replacement).
   if (!global._mongoClientPromise) {
     console.log("Creating new MongoDB client connection (development)");
-    client = new MongoClient(MONGO_URI, options);
+    client = new MongoClient(MONGODB_URI, options);
     global._mongoClientPromise = client.connect();
   }
   clientPromise = global._mongoClientPromise;
 } else {
   // In production mode, it's best to not use a global variable.
   console.log("Creating new MongoDB client connection (production)");
-  client = new MongoClient(MONGO_URI, options);
+  client = new MongoClient(MONGODB_URI, options);
   clientPromise = client.connect();
 }
 
