@@ -2,6 +2,15 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import {
+  ClerkProvider,
+  SignedIn,
+  SignInButton,
+  UserButton,
+  SignedOut,
+} from "@clerk/nextjs";
+import Link from "next/link";
+import Image from "next/image";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,26 +33,70 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-      ></meta>
-      <head>
-        <Script
-          type="module"
-          src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
-          strategy="beforeInteractive"
-        />
-      </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4`}
-      >
-        {children}
-        {/* <div className=" bg-transparent fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto  z-10">
+    <ClerkProvider>
+      <html lang="en">
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0"
+        ></meta>
+        <head>
+          <Script
+            type="module"
+            src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
+            strategy="beforeInteractive"
+          />
+        </head>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased pt-8 px-4 bg-[var(--color-warm-white)] `}
+        >
+          <header>
+            <div className=" flex justify-between">
+              <div className="">
+                <Link href={"/"}>
+                  <Image
+                    src={"/BetterMenu.png"}
+                    alt="Better Menu Logo"
+                    width={100}
+                    height={100}
+                  />
+                </Link>
+              </div>
+              <SignedOut>
+                <SignInButton
+                  fallbackRedirectUrl={
+                    process.env.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL
+                  }
+                  signUpFallbackRedirectUrl={
+                    process.env.CLERK_SIGN_UP_FALLBACK_REDIRECT_URL
+                  }
+                />
+              </SignedOut>
+              <SignedIn>
+                <div className="flex gap-x-4 items-center">
+                  <UserButton />
+                  <Link
+                    className="transition-all ease-in-out duration-100 active:scale-110 hover:scale-110"
+                    href={`/admin`}
+                    prefetch={true}
+                  >
+                    <Image
+                      src={`/Icons/icons8-plate-96.png`}
+                      alt="admin icon"
+                      width={30}
+                      height={30}
+                      loading="lazy"
+                    />
+                  </Link>
+                </div>
+              </SignedIn>
+            </div>
+          </header>
+          {children}
+          {/* <div className=" bg-transparent fixed bottom-20 left-1/2 -translate-x-1/2 mx-auto  z-10">
           <NavBar />
         </div> */}
-      </body>
-    </html>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

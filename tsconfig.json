@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/lib/*": ["./lib/*"]
     }
   },
   "include": [
@@ -27,7 +28,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "global.d.ts"
+    "global.d.ts",
+    "tailwind.config.js"
   ],
   "exclude": ["node_modules"]
 }

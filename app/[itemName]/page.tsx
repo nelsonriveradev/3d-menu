@@ -1,14 +1,14 @@
 import Image from "next/image";
+supabase;
 import Link from "next/link";
 import DetailCards from "../components/DetailCards";
 import ARScene from "../components/ARScene";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "../../lib/supabase/supabaseClient";
 export default async function ItemDetails({
   params,
 }: {
   params: Promise<{ itemName: string }>;
 }) {
-  const supabase = createClient();
   const itemName = decodeURIComponent((await params).itemName);
 
   const { data: menuItem, error } = await supabase
